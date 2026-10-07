@@ -1,27 +1,27 @@
 /* ============================================================
    Venom 官网 · 设计系统
-   一张暗色画布 + 单一强调色（翡翠绿），双字体族，克制运动
+   一张白色画布 + 单一强调色（企业蓝），双字体族，克制运动
    与 Viper 官网共享同一套设计 token（同属 GVSDS 语言生态）
    ============================================================ */
 
 :root {
-  /* 色板 —— 浅色企业风格 */
+  /* 色板 —— 蓝白企业风格 */
   --bg: #ffffff;
-  --bg-soft: #f4f8f6;
-  --bg-deep: #0b1712; /* 深色区（代码窗 / 页脚） */
-  --panel: rgba(16, 32, 26, 0.03);
-  --panel-strong: rgba(16, 32, 26, 0.05);
-  --line: rgba(14, 138, 93, 0.3);
-  --line-soft: #dfe8e3;
-  --text: #10201a;
-  --text-dim: #5b6e64;
-  --text-faint: #8da097;
-  --accent: #0e8a5d;
-  --accent-rgb: 14, 138, 93; /* 主题色分量，供 rgba(var(--accent-rgb), α) 使用 */
-  --accent-strong: #0b7650;
+  --bg-soft: #f1f6fc;
+  --bg-deep: #0a1a2f; /* 深色区（代码窗 / 页脚），深海军蓝 */
+  --panel: rgba(16, 42, 74, 0.03);
+  --panel-strong: rgba(16, 42, 74, 0.05);
+  --line: rgba(29, 111, 184, 0.3);
+  --line-soft: #dce7f3;
+  --text: #0f1f33;
+  --text-dim: #55697f;
+  --text-faint: #8497ab;
+  --accent: #1d6fb8;
+  --accent-rgb: 29, 111, 184; /* 主题色分量，供 rgba(var(--accent-rgb), α) 使用 */
+  --accent-strong: #155a99;
   --accent-ink: #ffffff;
-  --glow: rgba(14, 138, 93, 0.16);
-  --shadow-code: 0 26px 60px -30px rgba(15, 42, 32, 0.4);
+  --glow: rgba(29, 111, 184, 0.16);
+  --shadow-code: 0 26px 60px -30px rgba(10, 26, 47, 0.4);
 
   /* 字体（本地栈，无外网依赖） */
   --font-sans: 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei',
@@ -33,10 +33,10 @@
   --tok-str: #a5d6ff;
   --tok-num: #79c0ff;
   --tok-type: #ffa657;
-  --tok-fn: #a8e063;
-  --tok-cmt: #6e8b79;
-  --tok-punc: #8b9f8f;
-  --tok-plain: #d5e3d8;
+  --tok-fn: #7ab8ff;
+  --tok-cmt: #6b83a0;
+  --tok-punc: #8fa4bc;
+  --tok-plain: #d6e2f2;
 
   --radius: 10px;
   --radius-sm: 6px;
@@ -108,12 +108,12 @@ button {
   height: 11px;
 }
 ::-webkit-scrollbar-thumb {
-  background: #c3d3cb;
+  background: #c2d3e6;
   border-radius: 6px;
   border: 3px solid var(--bg);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #9db3a3;
+  background: #9ab4cd;
 }
 
 /* ------- 版式工具 ------- */
@@ -186,13 +186,13 @@ button {
 .btn-primary {
   background: var(--accent);
   color: var(--accent-ink);
-  box-shadow: 0 0 0 1px var(--accent), 0 10px 26px -14px rgba(14, 138, 93, 0.7);
+  box-shadow: 0 0 0 1px var(--accent), 0 10px 26px -14px rgba(29, 111, 184, 0.7);
 }
 
 .btn-primary:hover {
   background: var(--accent-strong);
   transform: translateY(-2px);
-  box-shadow: 0 0 0 1px var(--accent-strong), 0 16px 34px -14px rgba(14, 138, 93, 0.8);
+  box-shadow: 0 0 0 1px var(--accent-strong), 0 16px 34px -14px rgba(29, 111, 184, 0.8);
 }
 
 .btn-ghost {
@@ -203,7 +203,7 @@ button {
 
 .btn-ghost:hover {
   border-color: var(--line);
-  background: rgba(14, 138, 93, 0.06);
+  background: rgba(29, 111, 184, 0.06);
   color: var(--accent-strong);
   transform: translateY(-2px);
 }
@@ -255,7 +255,7 @@ button {
 /* 代码块基础（页面上保留深色代码窗，形成浅色页的对比锚点） */
 .code-win {
   --line-soft: rgba(255, 255, 255, 0.08);
-  --text-faint: #6d8a7c;
+  --text-faint: #6f88a0;
   background: var(--bg-deep);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius);
@@ -276,7 +276,7 @@ button {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #3c4a42;
+  background: #35485e;
 }
 
 .code-win__dot:nth-child(1) {

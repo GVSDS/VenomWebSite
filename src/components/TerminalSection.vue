@@ -33,12 +33,12 @@ import { t } from '@/i18n'
 }
 
 .term .out {
-  color: #5ad7a6;
+  color: #7cc4ff;
 }
 
 .term .p::before {
   content: '$ ';
-  color: #5ad7a6;
+  color: #7cc4ff;
   font-weight: 700;
   user-select: none;
 }

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { RouterLink } from 'vue-router'
 import { t, currentLang, setLang } from '@/i18n'
 
 const scrolled = ref(false)
@@ -25,14 +26,14 @@ onBeforeUnmount(() => {
 <template>
   <header class="site-header" :class="{ scrolled }">
     <div class="container header-inner">
-      <a class="brand" href="#top">
+      <RouterLink class="brand" to="/">
         <svg viewBox="0 0 64 64" aria-hidden="true">
           <rect width="64" height="64" rx="14" fill="none" />
           <path d="M14 47 V17 h8 l10 19 10-19 h8 V47 H40 V28 L32 47 24 28 v19 Z" />
         </svg>
         <span class="brand-name">Venom</span>
         <span class="brand-sub mono">PKG&nbsp;MANAGER</span>
-      </a>
+      </RouterLink>
 
       <div class="header-actions">
         <button class="lang-btn mono" @click="toggleLang" aria-label="Switch language">
@@ -123,7 +124,7 @@ onBeforeUnmount(() => {
 .lang-btn:hover {
   border-color: var(--line);
   color: var(--accent-strong);
-  background: rgba(14, 138, 93, 0.06);
+  background: rgba(29, 111, 184, 0.06);
 }
 
 .nav-pill {
@@ -139,7 +140,7 @@ onBeforeUnmount(() => {
 .nav-pill:hover {
   color: var(--accent-strong);
   border-color: var(--line);
-  background: rgba(14, 138, 93, 0.05);
+  background: rgba(29, 111, 184, 0.05);
 }
 
 @media (max-width: 640px) {

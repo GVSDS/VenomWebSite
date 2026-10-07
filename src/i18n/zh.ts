@@ -1,8 +1,12 @@
 // Venom 官网 · 中文文案字典
 // 注意：结构与 en.ts 完全一致（en.ts 以 typeof zh 校验）
 export default {
+  site: {
+    title: 'Venom · Viper 官方包管理器',
+  },
   header: {
     backToViper: '← viper.gvsds.com',
+    toHome: '首页',
   },
   hero: {
     badge: 'UNDER DEVELOPMENT · 开发中',
@@ -40,6 +44,32 @@ export default {
     file: 'venom — 示意 · sample',
     cmdComment: '# 命令示意，正式接口将于发布时确定',
     soon: '// 当前为品牌占位页 · 生态与接口随后公布 —— placeholder page, details will follow',
+  },
+  project: {
+    back: '← 返回首页',
+    loading: '正在读取包信息…',
+    notFound: '未找到该包',
+    loadFailed: '加载失败',
+    retry: '重试',
+    noDesc: '该包未填写说明',
+    install: '安装',
+    installHint: '在 Viper 工程中执行',
+    latest: '最新版本',
+    released: '发布',
+    dependencies: '依赖',
+    dependency: '包名',
+    constraint: '版本约束',
+    noDeps: '无外部依赖',
+    versions: '版本历史',
+    version: '版本',
+    publishedBy: '发布人',
+    publishedAt: '发布时间',
+    notes: '说明',
+    noVersions: '暂无发布记录',
+    readme: 'README',
+    noReadme: '该包暂未提供 README',
+    author: '作者',
+    updatedAt: '最近更新',
   },
   footer: {
     tagline: 'Viper 官方包管理器 · 开发中',

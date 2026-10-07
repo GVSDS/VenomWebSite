@@ -102,7 +102,7 @@ function onCardPointerMove(e: PointerEvent) {
 .cap-card:hover {
   border-color: var(--line);
   transform: translateY(-3px);
-  box-shadow: 0 22px 46px -30px rgba(14, 138, 93, 0.5);
+  box-shadow: 0 22px 46px -30px rgba(29, 111, 184, 0.5);
 }
 
 /* 卡片内容压在光晕之上 */

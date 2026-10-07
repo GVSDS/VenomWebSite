@@ -3,8 +3,12 @@
 import type zh from './zh'
 
 const en: typeof zh = {
+  site: {
+    title: 'Venom · the Viper package manager',
+  },
   header: {
     backToViper: '← viper.gvsds.com',
+    toHome: 'Home',
   },
   hero: {
     badge: 'UNDER DEVELOPMENT',
@@ -42,6 +46,32 @@ const en: typeof zh = {
     file: 'venom — sample',
     cmdComment: '# sample commands; the real CLI lands with the release',
     soon: '// a brand placeholder — ecosystem & interfaces to follow',
+  },
+  project: {
+    back: '← Back to home',
+    loading: 'Loading package…',
+    notFound: 'Package not found',
+    loadFailed: 'Failed to load',
+    retry: 'Retry',
+    noDesc: 'No description provided',
+    install: 'Install',
+    installHint: 'Run inside a Viper project',
+    latest: 'Latest',
+    released: 'Releases',
+    dependencies: 'Dependencies',
+    dependency: 'Package',
+    constraint: 'Constraint',
+    noDeps: 'No external dependencies',
+    versions: 'Version history',
+    version: 'Version',
+    publishedBy: 'Publisher',
+    publishedAt: 'Published',
+    notes: 'Notes',
+    noVersions: 'No releases yet',
+    readme: 'README',
+    noReadme: 'No README provided',
+    author: 'Author',
+    updatedAt: 'Updated',
   },
   footer: {
     tagline: 'The Viper package manager · work in progress',

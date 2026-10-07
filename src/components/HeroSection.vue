@@ -64,7 +64,7 @@ import { t } from '@/i18n'
   }
 }
 
-/* 背景：白底 + 极淡翡翠辉光（下缘越过 hero 底边，继续可见于下一 section） */
+/* 背景：白底 + 极淡蓝色辉光（下缘越过 hero 底边，继续可见于下一 section） */
 .hero-bg {
   position: absolute;
   inset: 0;
@@ -80,7 +80,7 @@ import { t } from '@/i18n'
   width: 1100px;
   height: 155%;
   border-radius: 50%;
-  background: radial-gradient(ellipse at 50% 41%, rgba(14, 138, 93, 0.1), transparent 68%);
+  background: radial-gradient(ellipse at 50% 41%, rgba(29, 111, 184, 0.12), transparent 68%);
   filter: blur(24px);
 }
 
@@ -95,8 +95,8 @@ import { t } from '@/i18n'
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  border: 1px solid rgba(29, 111, 184, 0.35);
-  color: #1d6fb8;
+  border: 1px solid rgba(var(--accent-rgb), 0.35);
+  color: var(--accent);
   font-size: 0.7rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -110,7 +110,7 @@ import { t } from '@/i18n'
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #1d6fb8;
+  background: var(--accent);
   animation: caretBlink 1.4s steps(1) infinite;
 }
 
