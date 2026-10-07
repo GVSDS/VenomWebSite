@@ -3,8 +3,9 @@
  * 包详情页 `/project/<包名>`（PyPI 风格版式）
  *
  * 数据来自 `/API/Venom/Project/<包名>`（主服务按域名反查产品并回源子服务器）。
- * 左侧为 README（Markdown → 消毒 HTML），右侧为元数据 / 依赖 / 版本历史卡片。
- * 数据到达前展示骨架 loading 层，避免首屏空白。
+ * 顶部为 PyPI `banner--project` 式蓝色头部块（包名 + 摘要 + 安装命令），
+ * 下方左栏为 README（Markdown → 消毒 HTML），右栏为元数据 / 依赖 / 版本历史卡片。
+ * 数据到达前头部与正文都展示骨架 loading，避免首屏空白。
  */
 import { computed, ref, watch } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
@@ -78,19 +79,41 @@ watch(() => route.params.name, load, { immediate: true })
 
 <template>
   <section class="project">
-    <div class="container">
-      <RouterLink class="back" to="/">{{ t.project.back }}</RouterLink>
+    <!-- ==================== 顶部头部块（banner） ==================== -->
+    <div v-if="!notFound && !error" class="banner">
+      <div class="container banner-inner">
+        <RouterLink class="back" to="/">{{ t.project.back }}</RouterLink>
 
-      <!-- ==================== loading 层（骨架） ==================== -->
+        <template v-if="project">
+          <h1 class="banner-name">
+            {{ project.PackageName }}
+            <span v-if="project.LatestVersion" class="banner-ver">{{ project.LatestVersion }}</span>
+          </h1>
+          <p class="banner-summary">{{ project.PackageDesc || t.project.noDesc }}</p>
+          <div class="install">
+            <code class="install-cmd">{{ installCommand }}</code>
+            <button class="copy" @click="copyInstall">{{ copied ? 'OK' : 'COPY' }}</button>
+          </div>
+          <p class="banner-hint">{{ t.project.installHint }}</p>
+        </template>
+
+        <template v-else>
+          <div class="sk sk-name on-blue"></div>
+          <div class="sk sk-line on-blue"></div>
+          <div class="sk sk-bar on-blue"></div>
+          <p class="banner-hint">{{ t.project.loading }}</p>
+        </template>
+      </div>
+    </div>
+
+    <!-- ==================== 正文 ==================== -->
+    <div class="container body">
+      <!-- loading 层（骨架） -->
       <div v-if="loading" class="layout" aria-busy="true" aria-live="polite">
         <div class="main">
-          <div class="sk sk-title"></div>
-          <div class="sk sk-line"></div>
-          <div class="sk sk-line short"></div>
-          <div class="sk sk-bar"></div>
           <div class="sk sk-block"></div>
           <div class="sk sk-block"></div>
-          <p class="sk-hint">{{ t.project.loading }}</p>
+          <div class="sk sk-block short"></div>
         </div>
         <aside class="side">
           <div class="sk sk-card"></div>
@@ -98,7 +121,7 @@ watch(() => route.params.name, load, { immediate: true })
         </aside>
       </div>
 
-      <!-- ==================== 不存在 / 失败 ==================== -->
+      <!-- 不存在 / 失败 -->
       <div v-else-if="notFound" class="state">
         <p class="state-title">{{ t.project.notFound }}</p>
         <p class="state-sub">{{ route.params.name }}</p>
@@ -111,20 +134,9 @@ watch(() => route.params.name, load, { immediate: true })
         <button class="btn btn-ghost" @click="load">{{ t.project.retry }}</button>
       </div>
 
-      <!-- ==================== 包详情 ==================== -->
+      <!-- 包详情 -->
       <div v-else-if="project" class="layout">
         <div class="main">
-          <h1 class="pkg-name">{{ project.PackageName }}</h1>
-          <p class="pkg-desc">{{ project.PackageDesc || t.project.noDesc }}</p>
-
-          <div class="install">
-            <code class="install-cmd">{{ installCommand }}</code>
-            <button class="copy" @click="copyInstall">{{ copied ? 'OK' : 'COPY' }}</button>
-          </div>
-          <p class="hint">{{ t.project.installHint }}</p>
-
-          <hr class="rule" />
-
           <article class="readme">
             <div v-if="readmeHtml" class="md" v-html="readmeHtml"></div>
           </article>
@@ -195,21 +207,12 @@ watch(() => route.params.name, load, { immediate: true })
 <style scoped>
 /* ==================== 页面骨架 ==================== */
 .project {
-  padding-top: calc(var(--nav-h) + 28px);
   padding-bottom: clamp(3rem, 6vw, 5rem);
   min-height: 70vh;
 }
 
-.back {
-  display: inline-block;
-  font-size: 0.85rem;
-  color: var(--accent);
-  margin-bottom: 20px;
-}
-
-.back:hover {
-  color: var(--accent-strong);
-  text-decoration: underline;
+.body {
+  padding-top: 30px;
 }
 
 .layout {
@@ -230,12 +233,115 @@ watch(() => route.params.name, load, { immediate: true })
   min-width: 0;
 }
 
+/* ==================== 顶部头部块（PyPI banner--project） ==================== */
+.banner {
+  background: #006dad;
+  color: #fff;
+  padding: calc(var(--nav-h) + 22px) 0 30px;
+}
+
+.banner-inner {
+  display: block;
+}
+
+.banner .back {
+  display: inline-block;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 16px;
+}
+
+.banner .back:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.banner-name {
+  font-size: clamp(1.7rem, 3.2vw, 2.2rem);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: #fff;
+  word-break: break-all;
+}
+
+.banner-ver {
+  margin-left: 10px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.72);
+  vertical-align: middle;
+}
+
+.banner-summary {
+  margin-top: 10px;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.92);
+  max-width: 76ch;
+}
+
+.install {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 620px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius);
+  padding: 9px 11px;
+}
+
+.install-cmd {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-code);
+  font-size: 0.86rem;
+  color: #fff;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.copy {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #006dad;
+  background: #fff;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 5px 11px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.copy:hover {
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.banner-hint {
+  margin-top: 9px;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.72);
+}
+
 /* ==================== loading 骨架 ==================== */
 .sk {
   background: linear-gradient(90deg, #eef0f2 25%, #f6f7f8 37%, #eef0f2 63%);
   background-size: 400% 100%;
   border-radius: var(--radius-sm);
   animation: skShimmer 1.3s ease-in-out infinite;
+}
+
+/* 蓝色头部块上的骨架：半透明白 */
+.sk.on-blue {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.2) 25%,
+    rgba(255, 255, 255, 0.34) 37%,
+    rgba(255, 255, 255, 0.2) 63%
+  );
+  background-size: 400% 100%;
 }
 
 @keyframes skShimmer {
@@ -253,42 +359,43 @@ watch(() => route.params.name, load, { immediate: true })
   }
 }
 
-.sk-title {
-  width: 42%;
-  height: 34px;
+.sk-name {
+  width: 38%;
+  height: 32px;
 }
 
 .sk-line {
   margin-top: 14px;
-  width: 78%;
+  width: 62%;
   height: 14px;
 }
 
-.sk-line.short {
-  width: 52%;
-}
-
 .sk-bar {
-  margin-top: 22px;
+  margin-top: 20px;
   width: 100%;
+  max-width: 620px;
   height: 40px;
 }
 
 .sk-block {
-  margin-top: 26px;
   width: 100%;
-  height: 120px;
+  height: 130px;
+}
+
+.sk-block + .sk-block {
+  margin-top: 22px;
+}
+
+.sk-block.short {
+  height: 70px;
 }
 
 .sk-card {
   height: 150px;
-  margin-bottom: 18px;
 }
 
-.sk-hint {
+.sk-card + .sk-card {
   margin-top: 18px;
-  font-size: 0.82rem;
-  color: var(--text-faint);
 }
 
 /* ==================== 状态（不存在 / 失败） ==================== */
@@ -297,7 +404,7 @@ watch(() => route.params.name, load, { immediate: true })
   flex-direction: column;
   align-items: flex-start;
   gap: 12px;
-  padding: 40px 0;
+  padding: 32px 0;
 }
 
 .state-title {
@@ -310,74 +417,6 @@ watch(() => route.params.name, load, { immediate: true })
   font-size: 0.88rem;
   color: var(--text-faint);
   word-break: break-all;
-}
-
-/* ==================== 包信息 ==================== */
-.pkg-name {
-  font-size: clamp(1.75rem, 3.2vw, 2.25rem);
-  font-weight: 700;
-  line-height: 1.2;
-  letter-spacing: -0.01em;
-  color: var(--text);
-  word-break: break-all;
-}
-
-.pkg-desc {
-  margin-top: 10px;
-  font-size: 1rem;
-  color: var(--text-dim);
-  max-width: 72ch;
-}
-
-.install {
-  margin-top: 20px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: var(--bg-soft);
-  border: 1px solid var(--line-soft);
-  border-radius: var(--radius);
-  padding: 10px 12px;
-}
-
-.install-cmd {
-  flex: 1;
-  min-width: 0;
-  font-family: var(--font-code);
-  font-size: 0.86rem;
-  color: var(--text);
-  overflow-x: auto;
-  white-space: nowrap;
-}
-
-.copy {
-  flex-shrink: 0;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  color: var(--accent);
-  border: 1px solid var(--line-soft);
-  border-radius: var(--radius-sm);
-  padding: 5px 10px;
-  background: #fff;
-  transition: color 0.15s, border-color 0.15s, background 0.15s;
-}
-
-.copy:hover {
-  color: var(--accent-strong);
-  border-color: var(--accent);
-}
-
-.hint {
-  margin-top: 8px;
-  font-size: 0.8rem;
-  color: var(--text-faint);
-}
-
-.rule {
-  margin: 28px 0 24px;
-  border: none;
-  border-top: 1px solid var(--line-soft);
 }
 
 /* ==================== README ==================== */

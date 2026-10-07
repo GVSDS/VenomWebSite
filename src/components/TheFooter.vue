@@ -31,15 +31,12 @@ const year = new Date().getFullYear()
 
 <style scoped>
 .footer {
-  --text: #e8f1fa;
-  --text-dim: #9db8cf;
-  --text-faint: #6f88a0;
-  --line-soft: rgba(255, 255, 255, 0.09);
-  --accent: #7cc4ff;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  background: var(--bg-deep);
+  --foot-fg: #ffffff;
+  --foot-fg-dim: rgba(255, 255, 255, 0.82);
+  --foot-fg-faint: rgba(255, 255, 255, 0.68);
+  background: #0070b2;
   padding: 34px 0 30px;
-  color: #6f88a0;
+  color: var(--foot-fg-dim);
 }
 
 .footer-inner {
@@ -60,11 +57,11 @@ const year = new Date().getFullYear()
 .f-brand-line svg {
   width: 22px;
   height: 22px;
-  fill: var(--accent);
+  fill: var(--foot-fg);
 }
 
 .f-name {
-  color: #e8f1fa;
+  color: var(--foot-fg);
   font-size: 1.05rem;
   font-weight: 750;
 }
@@ -80,16 +77,17 @@ const year = new Date().getFullYear()
 }
 
 .foot-links a {
-  color: #9db8cf;
+  color: var(--foot-fg-dim);
   transition: color 0.2s;
 }
 
 .foot-links a:hover {
-  color: #7cc4ff;
+  color: var(--foot-fg);
+  text-decoration: underline;
 }
 
 .f-copy {
-  color: #6f88a0;
+  color: var(--foot-fg-faint);
   font-size: 0.76rem;
   letter-spacing: 0.04em;
 }

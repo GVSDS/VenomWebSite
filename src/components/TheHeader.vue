@@ -53,23 +53,23 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
+/* 常驻品牌蓝顶栏（#0073B7 底 + 白字），滚动时只加一层阴影 */
 .site-header {
+  --hdr-fg: #ffffff;
+  --hdr-fg-dim: rgba(255, 255, 255, 0.82);
+  --hdr-line: rgba(255, 255, 255, 0.45);
   position: fixed;
   inset: 0 0 auto;
   z-index: 60;
   height: var(--nav-h);
   display: flex;
   align-items: center;
-  border-bottom: 1px solid transparent;
-  transition: background 0.35s var(--ease-out), border-color 0.35s var(--ease-out),
-    backdrop-filter 0.35s var(--ease-out);
+  background: #0073b7;
+  transition: box-shadow 0.3s var(--ease-out);
 }
 
 .site-header.scrolled {
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border-bottom-color: var(--line-soft);
+  box-shadow: 0 2px 12px -6px rgba(10, 26, 47, 0.45);
 }
 
 .header-inner {
@@ -88,17 +88,18 @@ onBeforeUnmount(() => {
 .brand svg {
   width: 24px;
   height: 24px;
-  fill: var(--accent);
+  fill: var(--hdr-fg);
 }
 
 .brand-name {
   font-weight: 750;
   font-size: 1.2rem;
   letter-spacing: 0.02em;
+  color: var(--hdr-fg);
 }
 
 .brand-sub {
-  color: var(--accent);
+  color: var(--hdr-fg-dim);
   font-size: 0.62rem;
   letter-spacing: 0.22em;
   transform: translateY(1px);
@@ -111,8 +112,8 @@ onBeforeUnmount(() => {
 }
 
 .lang-btn {
-  border: 1px solid var(--line-soft);
-  color: var(--text-dim);
+  border: 1px solid var(--hdr-line);
+  color: var(--hdr-fg);
   width: 42px;
   height: 34px;
   border-radius: 8px;
@@ -122,15 +123,14 @@ onBeforeUnmount(() => {
 }
 
 .lang-btn:hover {
-  border-color: var(--line);
-  color: var(--accent-strong);
-  background: rgba(var(--accent-rgb), 0.06);
+  border-color: #fff;
+  background: rgba(255, 255, 255, 0.16);
 }
 
 .nav-pill {
-  color: var(--text-dim);
+  color: var(--hdr-fg);
   font-size: 0.86rem;
-  border: 1px solid var(--line-soft);
+  border: 1px solid var(--hdr-line);
   border-radius: 999px;
   padding: 7px 15px;
   transition: color 0.22s var(--ease-out), border-color 0.22s var(--ease-out),
@@ -138,9 +138,8 @@ onBeforeUnmount(() => {
 }
 
 .nav-pill:hover {
-  color: var(--accent-strong);
-  border-color: var(--line);
-  background: rgba(var(--accent-rgb), 0.05);
+  border-color: #fff;
+  background: rgba(255, 255, 255, 0.16);
 }
 
 @media (max-width: 640px) {
