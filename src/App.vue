@@ -22,21 +22,51 @@ watchEffect(() => {
 })
 
 /** 全局滚动揭示：观察 [data-reveal]，进入视口即落定一次 */
+let revealIo: IntersectionObserver | null = null
+let revealMo: MutationObserver | null = null
+
+/** 把单个元素纳入观察（已落定的跳过） */
+function observeReveal(el: Element) {
+  if (!revealIo || el.classList.contains('in')) return
+  revealIo.observe(el)
+}
+
 function setupRevealObserver() {
   const els = document.querySelectorAll('[data-reveal]')
-  if (!('IntersectionObserver' in window) || els.length === 0) return
-  const io = new IntersectionObserver(
-    (entries) => {
-      for (const entry of entries) {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('in')
-          io.unobserve(entry.target)
+  // 不支持 IntersectionObserver 时直接全部显示，避免内容永久隐藏
+  if (!('IntersectionObserver' in window)) {
+    els.forEach((el) => el.classList.add('in'))
+    return
+  }
+  if (!revealIo) {
+    revealIo = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in')
+            revealIo?.unobserve(entry.target)
+          }
+        }
+      },
+      { threshold: 0.12, rootMargin: '0px 0px -7% 0px' },
+    )
+  }
+  els.forEach(observeReveal)
+
+  // 异步数据渲染出来的元素（如详情页加载完成后才出现的内容）也要纳入观察，
+  // 否则它们会一直停在 opacity: 0 —— 页面看起来就是空白的。
+  if (!revealMo) {
+    revealMo = new MutationObserver((records) => {
+      for (const record of records) {
+        for (const node of record.addedNodes) {
+          if (!(node instanceof Element)) continue
+          if (node.matches('[data-reveal]')) observeReveal(node)
+          node.querySelectorAll('[data-reveal]').forEach(observeReveal)
         }
       }
-    },
-    { threshold: 0.12, rootMargin: '0px 0px -7% 0px' },
-  )
-  els.forEach((el) => io.observe(el))
+    })
+    revealMo.observe(document.body, { childList: true, subtree: true })
+  }
 }
 
 // Lenis 平滑惯性滚动实例（接管滚轮，手势结束后继续滑行一段距离再停）
@@ -72,6 +102,10 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   lenis?.destroy()
   lenis = null
+  revealIo?.disconnect()
+  revealIo = null
+  revealMo?.disconnect()
+  revealMo = null
 })
 </script>
 
