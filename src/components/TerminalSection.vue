@@ -18,7 +18,7 @@ import { t } from '@/i18n'
 <span class="p"><span class="tok-fn">venom</span> <span class="tok-type">build</span></span>
 <span class="tok-plain">→</span> <span class="out">./output/app.exe</span> <span class="tok-plain">ready in</span> <span class="tok-num">86ms</span><span class="caret"></span></code></pre>
       </div>
-      <p class="soon mono" data-reveal>{{ t.terminal.soon }}</p>
+      <p class="soon" data-reveal>{{ t.terminal.soon }}</p>
     </div>
   </section>
 </template>

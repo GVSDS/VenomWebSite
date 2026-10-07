@@ -32,15 +32,15 @@ onBeforeUnmount(() => {
           <path d="M14 47 V17 h8 l10 19 10-19 h8 V47 H40 V28 L32 47 24 28 v19 Z" />
         </svg>
         <span class="brand-name">Venom</span>
-        <span class="brand-sub mono">PKG&nbsp;MANAGER</span>
+        <span class="brand-sub">PKG&nbsp;MANAGER</span>
       </RouterLink>
 
       <div class="header-actions">
-        <button class="lang-btn mono" @click="toggleLang" aria-label="Switch language">
+        <button class="lang-btn" @click="toggleLang" aria-label="Switch language">
           {{ currentLang === 'zh' ? 'EN' : '中' }}
         </button>
         <a
-          class="nav-pill mono"
+          class="nav-pill"
           href="https://viper.gvsds.com"
           target="_blank"
           rel="noreferrer"
@@ -124,7 +124,7 @@ onBeforeUnmount(() => {
 .lang-btn:hover {
   border-color: var(--line);
   color: var(--accent-strong);
-  background: rgba(29, 111, 184, 0.06);
+  background: rgba(var(--accent-rgb), 0.06);
 }
 
 .nav-pill {
@@ -140,7 +140,7 @@ onBeforeUnmount(() => {
 .nav-pill:hover {
   color: var(--accent-strong);
   border-color: var(--line);
-  background: rgba(29, 111, 184, 0.05);
+  background: rgba(var(--accent-rgb), 0.05);
 }
 
 @media (max-width: 640px) {

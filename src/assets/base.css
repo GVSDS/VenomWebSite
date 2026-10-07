@@ -1,32 +1,31 @@
 /* ============================================================
    Venom 官网 · 设计系统
-   一张白色画布 + 单一强调色（企业蓝），双字体族，克制运动
-   与 Viper 官网共享同一套设计 token（同属 GVSDS 语言生态）
+   对齐 PyPI 观感：白底、系统无衬线字体、蓝色链接、细灰边框、小圆角
    ============================================================ */
 
 :root {
-  /* 色板 —— 蓝白企业风格 */
+  /* 色板 —— PyPI 风格 */
   --bg: #ffffff;
-  --bg-soft: #f1f6fc;
+  --bg-soft: #f7f8fa;
   --bg-deep: #0a1a2f; /* 深色区（代码窗 / 页脚），深海军蓝 */
   --panel: rgba(16, 42, 74, 0.03);
   --panel-strong: rgba(16, 42, 74, 0.05);
-  --line: rgba(29, 111, 184, 0.3);
-  --line-soft: #dce7f3;
-  --text: #0f1f33;
-  --text-dim: #55697f;
-  --text-faint: #8497ab;
-  --accent: #1d6fb8;
-  --accent-rgb: 29, 111, 184; /* 主题色分量，供 rgba(var(--accent-rgb), α) 使用 */
-  --accent-strong: #155a99;
+  --line: rgba(0, 109, 173, 0.35);
+  --line-soft: #e1e3e5;
+  --text: #212529;
+  --text-dim: #4a5560;
+  --text-faint: #767f87;
+  --accent: #006dad; /* PyPI 链接蓝 */
+  --accent-rgb: 0, 109, 173;
+  --accent-strong: #00517d;
   --accent-ink: #ffffff;
-  --glow: rgba(29, 111, 184, 0.16);
+  --glow: rgba(0, 109, 173, 0.13);
   --shadow-code: 0 26px 60px -30px rgba(10, 26, 47, 0.4);
 
-  /* 字体（本地栈，无外网依赖） */
-  --font-sans: 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei',
-    system-ui, -apple-system, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Cascadia Code', Consolas, 'Courier New', monospace;
+  /* 字体：UI 一律系统无衬线（不使用等宽字体）；代码内容才用等宽 */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
+    Arial, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', system-ui, sans-serif;
+  --font-code: 'JetBrains Mono', 'Cascadia Code', Consolas, 'Courier New', monospace;
 
   /* 代码高亮（深色代码块内使用） */
   --tok-kw: #ff7b72;
@@ -38,8 +37,8 @@
   --tok-punc: #8fa4bc;
   --tok-plain: #d6e2f2;
 
-  --radius: 10px;
-  --radius-sm: 6px;
+  --radius: 6px;
+  --radius-sm: 4px;
   --container: 1140px;
   --nav-h: 66px;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
@@ -117,10 +116,6 @@ button {
 }
 
 /* ------- 版式工具 ------- */
-.mono {
-  font-family: var(--font-mono);
-}
-
 .container {
   width: min(var(--container), 100% - 48px);
   margin-inline: auto;
@@ -133,11 +128,11 @@ button {
 }
 
 .eyebrow {
-  font-family: var(--font-mono);
   font-size: 0.78rem;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.18em;
   color: var(--accent);
   text-transform: uppercase;
+  font-weight: 600;
   display: inline-flex;
   align-items: center;
   gap: 10px;
@@ -186,13 +181,13 @@ button {
 .btn-primary {
   background: var(--accent);
   color: var(--accent-ink);
-  box-shadow: 0 0 0 1px var(--accent), 0 10px 26px -14px rgba(29, 111, 184, 0.7);
+  box-shadow: 0 0 0 1px var(--accent), 0 10px 26px -14px rgba(var(--accent-rgb), 0.7);
 }
 
 .btn-primary:hover {
   background: var(--accent-strong);
   transform: translateY(-2px);
-  box-shadow: 0 0 0 1px var(--accent-strong), 0 16px 34px -14px rgba(29, 111, 184, 0.8);
+  box-shadow: 0 0 0 1px var(--accent-strong), 0 16px 34px -14px rgba(var(--accent-rgb), 0.8);
 }
 
 .btn-ghost {
@@ -203,7 +198,7 @@ button {
 
 .btn-ghost:hover {
   border-color: var(--line);
-  background: rgba(29, 111, 184, 0.06);
+  background: rgba(var(--accent-rgb), 0.06);
   color: var(--accent-strong);
   transform: translateY(-2px);
 }
@@ -291,7 +286,6 @@ button {
 
 .code-win__file {
   margin-left: auto;
-  font-family: var(--font-mono);
   font-size: 0.72rem;
   color: var(--text-faint);
   letter-spacing: 0.04em;
@@ -300,7 +294,7 @@ button {
 .code-win pre {
   padding: 20px 22px 22px;
   overflow-x: auto;
-  font-family: var(--font-mono);
+  font-family: var(--font-code);
   font-size: 0.86rem;
   line-height: 1.75;
   color: var(--tok-plain);

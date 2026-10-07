@@ -15,7 +15,7 @@ function onCardPointerMove(e: PointerEvent) {
   <section id="capabilities" class="section capabilities">
     <div class="container">
       <div class="cap-head" data-reveal>
-        <p class="eyebrow mono">{{ t.capabilities.eyebrow }}</p>
+        <p class="eyebrow">{{ t.capabilities.eyebrow }}</p>
         <h2 class="section-title">{{ t.capabilities.title }}</h2>
         <p class="section-sub">{{ t.capabilities.sub }}</p>
       </div>
@@ -28,8 +28,8 @@ function onCardPointerMove(e: PointerEvent) {
           data-reveal
           :style="{ '--reveal-delay': `${i * 110}ms` }"
         >
-          <p class="cap-num mono">{{ item.num }}</p>
-          <p class="cap-name mono">{{ item.name }}</p>
+          <p class="cap-num">{{ item.num }}</p>
+          <p class="cap-name">{{ item.name }}</p>
           <h3 class="cap-title">{{ item.title }}</h3>
           <p class="cap-desc">{{ item.desc }}</p>
         </article>
@@ -102,7 +102,7 @@ function onCardPointerMove(e: PointerEvent) {
 .cap-card:hover {
   border-color: var(--line);
   transform: translateY(-3px);
-  box-shadow: 0 22px 46px -30px rgba(29, 111, 184, 0.5);
+  box-shadow: 0 22px 46px -30px rgba(var(--accent-rgb), 0.5);
 }
 
 /* 卡片内容压在光晕之上 */

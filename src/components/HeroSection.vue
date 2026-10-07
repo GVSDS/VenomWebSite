@@ -9,14 +9,14 @@ import { t } from '@/i18n'
     </div>
 
     <div class="container hero-inner">
-      <p class="pill mono">
+      <p class="pill">
         <span class="dot"></span>
         <span>{{ t.hero.badge }}</span>
       </p>
       <h1 class="hero-brand">
         Venom<span class="brand-dot">.</span>
       </h1>
-      <p class="hero-stamp mono">{{ t.hero.stamp }}</p>
+      <p class="hero-stamp">{{ t.hero.stamp }}</p>
       <p class="hero-lead">{{ t.hero.lead }}</p>
 
       <div class="hero-cta">
@@ -25,7 +25,7 @@ import { t } from '@/i18n'
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" /></svg>
         </a>
         <a
-          class="btn btn-ghost mono"
+          class="btn btn-ghost"
           href="https://viper.gvsds.com/#ecosystem"
           target="_blank"
           rel="noreferrer"
@@ -35,7 +35,7 @@ import { t } from '@/i18n'
       </div>
     </div>
 
-    <a class="hero-scroll mono" href="#capabilities" aria-hidden="true">
+    <a class="hero-scroll" href="#capabilities" aria-hidden="true">
       <span>↓</span>
     </a>
   </section>
@@ -80,7 +80,7 @@ import { t } from '@/i18n'
   width: 1100px;
   height: 155%;
   border-radius: 50%;
-  background: radial-gradient(ellipse at 50% 41%, rgba(29, 111, 184, 0.12), transparent 68%);
+  background: radial-gradient(ellipse at 50% 41%, rgba(var(--accent-rgb), 0.12), transparent 68%);
   filter: blur(24px);
 }
 

@@ -1,9 +1,10 @@
 <script setup lang="ts">
 /**
- * 包详情页 `/project/<包名>`
+ * 包详情页 `/project/<包名>`（PyPI 风格版式）
  *
  * 数据来自 `/API/Venom/Project/<包名>`（主服务按域名反查产品并回源子服务器）。
- * 左侧渲染 README（Markdown → 消毒 HTML），右侧为安装命令 / 依赖列表 / 版本历史。
+ * 左侧为 README（Markdown → 消毒 HTML），右侧为元数据 / 依赖 / 版本历史卡片。
+ * 数据到达前展示骨架 loading 层，避免首屏空白。
  */
 import { computed, ref, watch } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
@@ -13,7 +14,8 @@ import { t } from '@/i18n'
 
 const route = useRoute()
 
-const loading = ref(false)
+/** 首屏即为 true：进入页面立刻进 loading 层，不留空白 */
+const loading = ref(true)
 const error = ref('')
 const notFound = ref(false)
 const project = ref<VenomProject | null>(null)
@@ -77,220 +79,312 @@ watch(() => route.params.name, load, { immediate: true })
 <template>
   <section class="project">
     <div class="container">
-      <RouterLink class="back mono" to="/">{{ t.project.back }}</RouterLink>
+      <RouterLink class="back" to="/">{{ t.project.back }}</RouterLink>
 
-      <p v-if="loading" class="state mono" data-reveal>{{ t.project.loading }}</p>
+      <!-- ==================== loading 层（骨架） ==================== -->
+      <div v-if="loading" class="layout" aria-busy="true" aria-live="polite">
+        <div class="main">
+          <div class="sk sk-title"></div>
+          <div class="sk sk-line"></div>
+          <div class="sk sk-line short"></div>
+          <div class="sk sk-bar"></div>
+          <div class="sk sk-block"></div>
+          <div class="sk sk-block"></div>
+          <p class="sk-hint">{{ t.project.loading }}</p>
+        </div>
+        <aside class="side">
+          <div class="sk sk-card"></div>
+          <div class="sk sk-card"></div>
+        </aside>
+      </div>
 
-      <div v-else-if="notFound" class="state" data-reveal>
+      <!-- ==================== 不存在 / 失败 ==================== -->
+      <div v-else-if="notFound" class="state">
         <p class="state-title">{{ t.project.notFound }}</p>
-        <p class="state-sub mono">{{ route.params.name }}</p>
+        <p class="state-sub">{{ route.params.name }}</p>
         <RouterLink class="btn btn-ghost" to="/">{{ t.project.back }}</RouterLink>
       </div>
 
-      <div v-else-if="error" class="state" data-reveal>
+      <div v-else-if="error" class="state">
         <p class="state-title">{{ t.project.loadFailed }}</p>
-        <p class="state-sub mono">{{ error }}</p>
+        <p class="state-sub">{{ error }}</p>
         <button class="btn btn-ghost" @click="load">{{ t.project.retry }}</button>
       </div>
 
-      <template v-else-if="project">
-        <!-- 包信息头 -->
-        <header class="pkg-head" data-reveal>
-          <div class="pkg-title">
-            <h1 class="pkg-name mono">{{ project.PackageName }}</h1>
-            <span v-if="project.LatestVersion" class="ver-pill mono">
-              v{{ project.LatestVersion }}
-            </span>
-          </div>
+      <!-- ==================== 包详情 ==================== -->
+      <div v-else-if="project" class="layout">
+        <div class="main">
+          <h1 class="pkg-name">{{ project.PackageName }}</h1>
           <p class="pkg-desc">{{ project.PackageDesc || t.project.noDesc }}</p>
-          <div class="pkg-meta mono">
-            <span v-if="project.CreatorName">{{ t.project.author }} {{ project.CreatorName }}</span>
-            <span>{{ t.project.released }} {{ project.ReleaseCount }}</span>
-            <span v-if="project.UpdateTime">{{ t.project.updatedAt }} {{ project.UpdateTime }}</span>
-            <span class="pkg-uuid">{{ project.PackageUUID }}</span>
+
+          <div class="install">
+            <code class="install-cmd">{{ installCommand }}</code>
+            <button class="copy" @click="copyInstall">{{ copied ? 'OK' : 'COPY' }}</button>
           </div>
-        </header>
+          <p class="hint">{{ t.project.installHint }}</p>
 
-        <div class="pkg-body">
-          <!-- README -->
-          <article class="readme" data-reveal>
-            <div class="eyebrow">{{ t.project.readme }}</div>
+          <hr class="rule" />
+
+          <article class="readme">
             <div v-if="readmeHtml" class="md" v-html="readmeHtml"></div>
-            <p v-else class="empty">{{ t.project.noReadme }}</p>
           </article>
-
-          <!-- 侧栏 -->
-          <aside class="side">
-            <div class="card" data-reveal>
-              <h2 class="card-title mono">{{ t.project.install }}</h2>
-              <div class="install">
-                <code class="install-cmd mono">{{ installCommand }}</code>
-                <button class="copy mono" @click="copyInstall">
-                  {{ copied ? 'OK' : 'COPY' }}
-                </button>
-              </div>
-              <p class="hint">{{ t.project.installHint }}</p>
-            </div>
-
-            <div class="card" data-reveal>
-              <h2 class="card-title mono">{{ t.project.dependencies }}</h2>
-              <ul v-if="project.Dependencies.length" class="deps">
-                <li v-for="d in project.Dependencies" :key="d.Name">
-                  <RouterLink class="dep-name mono" :to="`/project/${encodeName(d.Name)}`">
-                    {{ d.Name }}
-                  </RouterLink>
-                  <span class="dep-ver mono">{{ d.Version || '*' }}</span>
-                </li>
-              </ul>
-              <p v-else class="empty">{{ t.project.noDeps }}</p>
-            </div>
-
-            <div class="card" data-reveal>
-              <h2 class="card-title mono">{{ t.project.versions }}</h2>
-              <ul v-if="project.Releases.length" class="rels">
-                <li v-for="r in project.Releases" :key="r.ReleaseUUID">
-                  <div class="rel-line">
-                    <span class="rel-ver mono">{{ r.Version }}</span>
-                    <span class="rel-time mono">{{ r.CreateTime }}</span>
-                  </div>
-                  <p v-if="r.Notes" class="rel-notes">{{ r.Notes }}</p>
-                  <p v-if="r.PublisherName" class="rel-by mono">
-                    {{ t.project.publishedBy }} {{ r.PublisherName }}
-                  </p>
-                </li>
-              </ul>
-              <p v-else class="empty">{{ t.project.noVersions }}</p>
-            </div>
-          </aside>
         </div>
-      </template>
+
+        <aside class="side">
+          <div class="card">
+            <h2 class="card-title">{{ t.project.meta }}</h2>
+            <ul class="meta">
+              <li v-if="project.LatestVersion">
+                <span class="k">{{ t.project.latest }}</span>
+                <span class="v">{{ project.LatestVersion }}</span>
+              </li>
+              <li v-if="project.CreatorName">
+                <span class="k">{{ t.project.author }}</span>
+                <span class="v">{{ project.CreatorName }}</span>
+              </li>
+              <li>
+                <span class="k">{{ t.project.released }}</span>
+                <span class="v">{{ project.ReleaseCount }}</span>
+              </li>
+              <li v-if="project.UpdateTime">
+                <span class="k">{{ t.project.updatedAt }}</span>
+                <span class="v">{{ project.UpdateTime }}</span>
+              </li>
+              <li>
+                <span class="k">UUID</span>
+                <span class="v uuid">{{ project.PackageUUID }}</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <h2 class="card-title">{{ t.project.dependencies }}</h2>
+            <ul v-if="project.Dependencies.length" class="rows">
+              <li v-for="d in project.Dependencies" :key="d.Name">
+                <RouterLink class="dep-name" :to="`/project/${encodeName(d.Name)}`">
+                  {{ d.Name }}
+                </RouterLink>
+                <span class="dep-ver">{{ d.Version || '*' }}</span>
+              </li>
+            </ul>
+            <p v-else class="empty">{{ t.project.noDeps }}</p>
+          </div>
+
+          <div class="card">
+            <h2 class="card-title">{{ t.project.versions }}</h2>
+            <ul v-if="project.Releases.length" class="rows rels">
+              <li v-for="r in project.Releases" :key="r.ReleaseUUID">
+                <div class="rel-line">
+                  <span class="rel-ver">{{ r.Version }}</span>
+                  <span class="rel-time">{{ r.CreateTime }}</span>
+                </div>
+                <p v-if="r.Notes" class="rel-notes">{{ r.Notes }}</p>
+                <p v-if="r.PublisherName" class="rel-by">
+                  {{ t.project.publishedBy }} {{ r.PublisherName }}
+                </p>
+              </li>
+            </ul>
+            <p v-else class="empty">{{ t.project.noVersions }}</p>
+          </div>
+        </aside>
+      </div>
     </div>
   </section>
 </template>
 
 <style scoped>
-/* 页面基线：让开固定顶栏 */
+/* ==================== 页面骨架 ==================== */
 .project {
-  padding-top: calc(var(--nav-h) + 44px);
-  padding-bottom: clamp(4rem, 8vw, 6rem);
-  min-height: 60vh;
+  padding-top: calc(var(--nav-h) + 28px);
+  padding-bottom: clamp(3rem, 6vw, 5rem);
+  min-height: 70vh;
 }
 
 .back {
-  display: inline-flex;
-  font-size: 0.82rem;
-  letter-spacing: 0.06em;
-  color: var(--text-dim);
-  padding: 6px 12px;
-  border: 1px solid var(--line-soft);
-  border-radius: 999px;
-  transition: color 0.2s var(--ease-out), border-color 0.2s var(--ease-out);
+  display: inline-block;
+  font-size: 0.85rem;
+  color: var(--accent);
+  margin-bottom: 20px;
 }
 
 .back:hover {
   color: var(--accent-strong);
-  border-color: var(--line);
+  text-decoration: underline;
 }
 
-/* ------- 状态（加载 / 不存在 / 失败） ------- */
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 36px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 26px;
+  }
+}
+
+.main {
+  min-width: 0;
+}
+
+/* ==================== loading 骨架 ==================== */
+.sk {
+  background: linear-gradient(90deg, #eef0f2 25%, #f6f7f8 37%, #eef0f2 63%);
+  background-size: 400% 100%;
+  border-radius: var(--radius-sm);
+  animation: skShimmer 1.3s ease-in-out infinite;
+}
+
+@keyframes skShimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sk {
+    animation: none;
+  }
+}
+
+.sk-title {
+  width: 42%;
+  height: 34px;
+}
+
+.sk-line {
+  margin-top: 14px;
+  width: 78%;
+  height: 14px;
+}
+
+.sk-line.short {
+  width: 52%;
+}
+
+.sk-bar {
+  margin-top: 22px;
+  width: 100%;
+  height: 40px;
+}
+
+.sk-block {
+  margin-top: 26px;
+  width: 100%;
+  height: 120px;
+}
+
+.sk-card {
+  height: 150px;
+  margin-bottom: 18px;
+}
+
+.sk-hint {
+  margin-top: 18px;
+  font-size: 0.82rem;
+  color: var(--text-faint);
+}
+
+/* ==================== 状态（不存在 / 失败） ==================== */
 .state {
-  margin-top: 40px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 12px;
-  color: var(--text-dim);
+  padding: 40px 0;
 }
 
 .state-title {
-  font-size: 1.3rem;
+  font-size: 1.25rem;
   font-weight: 650;
   color: var(--text);
 }
 
 .state-sub {
-  font-size: 0.86rem;
+  font-size: 0.88rem;
   color: var(--text-faint);
   word-break: break-all;
 }
 
-/* ------- 包信息头 ------- */
-.pkg-head {
-  margin: 22px 0 34px;
-  padding-bottom: 22px;
-  border-bottom: 1px solid var(--line-soft);
-}
-
-.pkg-title {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
+/* ==================== 包信息 ==================== */
 .pkg-name {
-  font-size: clamp(1.5rem, 3.4vw, 2.1rem);
+  font-size: clamp(1.75rem, 3.2vw, 2.25rem);
   font-weight: 700;
+  line-height: 1.2;
   letter-spacing: -0.01em;
+  color: var(--text);
   word-break: break-all;
-}
-
-.ver-pill {
-  font-size: 0.78rem;
-  color: var(--accent-strong);
-  background: rgba(var(--accent-rgb), 0.09);
-  border: 1px solid rgba(var(--accent-rgb), 0.22);
-  border-radius: 999px;
-  padding: 3px 10px;
 }
 
 .pkg-desc {
   margin-top: 10px;
+  font-size: 1rem;
   color: var(--text-dim);
-  max-width: 70ch;
+  max-width: 72ch;
 }
 
-.pkg-meta {
-  margin-top: 14px;
+.install {
+  margin-top: 20px;
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px 20px;
-  font-size: 0.76rem;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-soft);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+}
+
+.install-cmd {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-code);
+  font-size: 0.86rem;
+  color: var(--text);
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.copy {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-sm);
+  padding: 5px 10px;
+  background: #fff;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.copy:hover {
+  color: var(--accent-strong);
+  border-color: var(--accent);
+}
+
+.hint {
+  margin-top: 8px;
+  font-size: 0.8rem;
   color: var(--text-faint);
 }
 
-.pkg-uuid {
-  opacity: 0.6;
+.rule {
+  margin: 28px 0 24px;
+  border: none;
+  border-top: 1px solid var(--line-soft);
 }
 
-/* ------- 主体两栏 ------- */
-.pkg-body {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
-  gap: 40px;
-  align-items: start;
-}
-
-@media (max-width: 980px) {
-  .pkg-body {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 28px;
-  }
-}
-
-/* ------- README ------- */
-.readme {
-  min-width: 0;
-}
-
-.readme .eyebrow {
-  margin-bottom: 12px;
-}
-
+/* ==================== README ==================== */
 .md {
   color: var(--text);
-  font-size: 0.97rem;
-  line-height: 1.78;
+  font-size: 0.95rem;
+  line-height: 1.75;
   word-wrap: break-word;
 }
 
@@ -300,8 +394,8 @@ watch(() => route.params.name, load, { immediate: true })
 .md :deep(h4) {
   font-weight: 650;
   line-height: 1.3;
-  letter-spacing: -0.01em;
-  margin: 1.9em 0 0.7em;
+  color: var(--text);
+  margin: 1.6em 0 0.6em;
 }
 
 .md :deep(h1) {
@@ -311,13 +405,13 @@ watch(() => route.params.name, load, { immediate: true })
 }
 
 .md :deep(h2) {
-  font-size: 1.28rem;
+  font-size: 1.24rem;
   padding-bottom: 0.28em;
   border-bottom: 1px solid var(--line-soft);
 }
 
 .md :deep(h3) {
-  font-size: 1.06rem;
+  font-size: 1.05rem;
 }
 
 .md :deep(> :first-child) {
@@ -343,16 +437,15 @@ watch(() => route.params.name, load, { immediate: true })
 
 .md :deep(a) {
   color: var(--accent);
-  border-bottom: 1px solid rgba(var(--accent-rgb), 0.3);
 }
 
 .md :deep(a:hover) {
   color: var(--accent-strong);
-  border-bottom-color: var(--accent-strong);
+  text-decoration: underline;
 }
 
 .md :deep(code) {
-  font-family: var(--font-mono);
+  font-family: var(--font-code);
   font-size: 0.86em;
   background: var(--bg-soft);
   border: 1px solid var(--line-soft);
@@ -377,7 +470,7 @@ watch(() => route.params.name, load, { immediate: true })
 }
 
 .md :deep(blockquote) {
-  border-left: 3px solid rgba(var(--accent-rgb), 0.35);
+  border-left: 3px solid var(--line-soft);
   background: var(--panel);
   padding: 2px 16px;
   color: var(--text-dim);
@@ -404,89 +497,84 @@ watch(() => route.params.name, load, { immediate: true })
 .md :deep(hr) {
   border: none;
   border-top: 1px solid var(--line-soft);
-  margin: 2em 0;
+  margin: 1.8em 0;
 }
 
 .md :deep(img) {
   border-radius: var(--radius);
+  max-width: 100%;
 }
 
-/* ------- 侧栏卡片 ------- */
+/* ==================== 侧栏卡片（PyPI 风格） ==================== */
 .side {
   display: flex;
   flex-direction: column;
   gap: 18px;
   position: sticky;
-  top: calc(var(--nav-h) + 20px);
+  top: calc(var(--nav-h) + 18px);
 }
 
 .card {
   border: 1px solid var(--line-soft);
   border-radius: var(--radius);
-  padding: 16px 16px 18px;
   background: #fff;
+  overflow: hidden;
 }
 
 .card-title {
-  font-size: 0.74rem;
-  letter-spacing: 0.18em;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 12px;
-}
-
-.install {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  color: var(--text);
   background: var(--bg-soft);
-  border: 1px solid var(--line-soft);
-  border-radius: var(--radius-sm);
-  padding: 9px 10px;
+  border-bottom: 1px solid var(--line-soft);
+  padding: 9px 13px;
 }
 
-.install-cmd {
-  flex: 1;
-  min-width: 0;
-  font-size: 0.8rem;
-  overflow-x: auto;
-  white-space: nowrap;
-}
-
-.copy {
-  flex-shrink: 0;
-  font-size: 0.68rem;
-  letter-spacing: 0.12em;
-  color: var(--text-dim);
-  border: 1px solid var(--line-soft);
-  border-radius: var(--radius-sm);
-  padding: 4px 8px;
-  transition: color 0.2s, border-color 0.2s;
-}
-
-.copy:hover {
-  color: var(--accent-strong);
-  border-color: var(--line);
-}
-
-.hint {
-  margin-top: 8px;
-  font-size: 0.76rem;
-  color: var(--text-faint);
-}
-
-.deps {
+.meta,
+.rows {
   list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
 }
 
-.deps li {
+.meta li {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 9px 13px;
+  border-bottom: 1px solid var(--line-soft);
+  font-size: 0.84rem;
+}
+
+.meta li:last-child,
+.rows li:last-child {
+  border-bottom: none;
+}
+
+.meta .k {
+  color: var(--text-faint);
+  flex-shrink: 0;
+}
+
+.meta .v {
+  color: var(--text);
+  text-align: right;
+  word-break: break-all;
+}
+
+.meta .uuid {
+  font-size: 0.76rem;
+  color: var(--text-dim);
+}
+
+.rows li {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 10px;
+  padding: 9px 13px;
+  border-bottom: 1px solid var(--line-soft);
   font-size: 0.84rem;
 }
 
@@ -502,25 +590,12 @@ watch(() => route.params.name, load, { immediate: true })
 
 .dep-ver {
   flex-shrink: 0;
-  font-size: 0.76rem;
+  font-size: 0.78rem;
   color: var(--text-faint);
 }
 
-.rels {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
 .rels li {
-  padding-bottom: 12px;
-  border-bottom: 1px dashed var(--line-soft);
-}
-
-.rels li:last-child {
-  padding-bottom: 0;
-  border-bottom: none;
+  display: block;
 }
 
 .rel-line {
@@ -531,13 +606,12 @@ watch(() => route.params.name, load, { immediate: true })
 }
 
 .rel-ver {
-  font-size: 0.86rem;
   font-weight: 650;
   color: var(--text);
 }
 
 .rel-time {
-  font-size: 0.72rem;
+  font-size: 0.74rem;
   color: var(--text-faint);
 }
 
@@ -550,12 +624,13 @@ watch(() => route.params.name, load, { immediate: true })
 
 .rel-by {
   margin-top: 4px;
-  font-size: 0.72rem;
+  font-size: 0.74rem;
   color: var(--text-faint);
 }
 
 .empty {
-  font-size: 0.84rem;
+  padding: 11px 13px;
+  font-size: 0.82rem;
   color: var(--text-faint);
 }
 </style>

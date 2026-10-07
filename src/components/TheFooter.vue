@@ -18,13 +18,13 @@ const year = new Date().getFullYear()
         <p class="f-tagline">{{ t.footer.tagline }}</p>
       </div>
 
-      <div class="foot-links mono">
+      <div class="foot-links">
         <a href="https://viper.gvsds.com" target="_blank" rel="noreferrer">Viper</a>
         <a href="https://venom.gvsds.com" target="_blank" rel="noreferrer">Venom</a>
         <a href="https://git.gvsds.com/GVSDS/TransPyC" target="_blank" rel="noreferrer">TransPyC</a>
       </div>
 
-      <p class="f-copy mono">{{ t.footer.copyright.replace('©', '© ' + year) }}</p>
+      <p class="f-copy">{{ t.footer.copyright.replace('©', '© ' + year) }}</p>
     </div>
   </footer>
 </template>
